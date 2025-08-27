@@ -10,7 +10,6 @@
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: #333;
         }
@@ -40,12 +39,12 @@
         }
         
         .upload-area:hover {
-            border-color: #667eea;
+            border-color: #bb2f00;
             background-color: #f7fafc;
         }
         
         .upload-area.dragover {
-            border-color: #667eea;
+            border-color: #bb2f00;
             background-color: #edf2f7;
         }
         
@@ -63,7 +62,7 @@
         
         .upload-subtext {
             font-size: 14px;
-            color: #718096;
+            color: #8d2401;
         }
         
         input[type="file"] {
@@ -71,7 +70,7 @@
         }
         
         .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #c33000 0%, #c33000 0%);
             color: white;
             border: none;
             padding: 12px 30px;
@@ -102,14 +101,13 @@
         }
         
         .status.success {
-            background-color: #c6f6d5;
-            color: #22543d;
-            border: 1px solid #9ae6b4;
+            
+            color: #bb2f00;
+            border: 1px solid #bb2f00;
         }
         
         .status.error {
             background-color: #fed7d7;
-            color: #742a2a;
             border: 1px solid #feb2b2;
         }
         
@@ -131,7 +129,6 @@
         
         .progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
             transition: width 0.3s ease;
             width: 0%;
         }
@@ -159,12 +156,12 @@
 </head>
 <body>
     <div class="container">
-        <h1>CSV Inlay Processor</h1>
+        <h1>JSON to list EPCs Converter</h1>
         
         <div class="upload-area" id="uploadArea">
             <div class="upload-icon">📄</div>
-            <div class="upload-text">Click to select CSV file or drag and drop</div>
-            <div class="upload-subtext">Upload your today_inlays.csv file for processing</div>
+            <div class="upload-text">Click or drag and drop your CSV file</div>
+            <div class="upload-subtext">Upload the CSV file exported from cyclecount table to expand the JSON string for EPCs</div>
             <input type="file" id="fileInput" accept=".csv" />
         </div>
         
