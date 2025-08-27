@@ -387,9 +387,9 @@
 
                 hideProgress();
                 showStatus('success', 
-                    `Processing complete! Processed ${processedCount} lines, ` +
-                    `skipped ${skippedCount} malformed lines. ` +
-                    `Generated ${outputRows.length - 1} output rows. File downloaded as output.csv.`);
+                    `Processed ${processedCount} lines, \n` +
+                    `Skipped ${skippedCount} malformed lines. \n` +
+                    `Generated ${outputRows.length - 1} output rows.`);
 
             } catch (error) {
                 console.error('Error processing CSV:', error);
