@@ -8,7 +8,7 @@ with open(input_file, 'r', encoding='utf-8') as infile, \
      open(output_file, 'w', newline='', encoding='utf-8') as outfile:
 
     writer = csv.writer(outfile)
-    writer.writerow(['id', 'userId', 'createdAt', 'name', 'cycleCount'])
+    writer.writerow(['id', 'userId', 'createdAt', 'name', 'cycleCount', 'tagCount'])
 
     next(infile)  
 
