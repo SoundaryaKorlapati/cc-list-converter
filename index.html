@@ -265,21 +265,75 @@
             progress.style.display = 'none';
         }
 
+        function parseCSVLineForCycleCount(line) {
+            const arrayStart = line.indexOf('[');
+            
+            if (arrayStart === -1) {
+                return null;
+            }
+            
+            const beforeArray = line.substring(0, arrayStart);
+            let arrayPart = line.substring(arrayStart);
+            
+            const arrayEnd = arrayPart.lastIndexOf(']');
+            if (arrayEnd !== -1) {
+                arrayPart = arrayPart.substring(0, arrayEnd + 1);
+            }
+            
+            const fields = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < beforeArray.length; i++) {
+                const char = beforeArray[i];
+                
+                if (inQuotes) {
+                    if (char === '"') {
+                        if (i + 1 < beforeArray.length && beforeArray[i + 1] === '"') {
+                            current += '"';
+                            i++;
+                        } else {
+                            inQuotes = false;
+                        }
+                    } else {
+                        current += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === ',') {
+                        fields.push(current.trim());
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+            }
+            if (current.trim()) {
+                fields.push(current.trim());
+            }
+            
+            return {
+                fields: fields,
+                arrayStr: arrayPart
+            };
+        }
+
         function parseListString(listStr) {
             try {
-                // Remove outer quotes if present
                 let cleaned = listStr.trim();
+                
                 if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || 
                     (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
                     cleaned = cleaned.slice(1, -1);
                 }
                 
+                cleaned = cleaned.replace(/""/g, '"');
+                
                 // Try to parse as JSON array first
                 try {
                     return JSON.parse(cleaned);
                 } catch {
-                    // If JSON parsing fails, try to evaluate as Python-like list
-                    // Replace single quotes with double quotes for JSON compatibility
                     cleaned = cleaned.replace(/'/g, '"');
                     return JSON.parse(cleaned);
                 }
@@ -306,7 +360,7 @@
                 // Skip header line
                 const dataLines = lines.slice(1).filter(line => line.trim());
                 
-                const outputRows = [['id', 'userId', 'createdAt', 'name', 'cycleCount', 'tagCount']];
+                const outputRows = [['id', 'userId', 'createdAt', 'name', 'EPC']];
                 let processedCount = 0;
                 let skippedCount = 0;
 
@@ -315,41 +369,29 @@
                     if (!line) continue;
 
                     try {
-                        // Split on comma, but be careful with quoted values
-                        const parts = [];
-                        let current = '';
-                        let inQuotes = false;
-                        let commaCount = 0;
+                        const parsed = parseCSVLineForCycleCount(line);
                         
-                        for (let j = 0; j < line.length; j++) {
-                            const char = line[j];
-                            
-                            if (char === '"' && (j === 0 || line[j-1] !== '\\')) {
-                                inQuotes = !inQuotes;
-                                current += char;
-                            } else if (char === ',' && !inQuotes && commaCount < 4) {
-                                parts.push(current);
-                                current = '';
-                                commaCount++;
-                            } else {
-                                current += char;
-                            }
-                        }
-                        parts.push(current); // Add the last part
-
-                        if (parts.length !== 5) {
+                        if (!parsed || parsed.fields.length < 4) {
                             console.warn(`Skipping malformed line: ${line}`);
                             skippedCount++;
                             continue;
                         }
-
-                        const [id, userId, createdAt, nameRaw, cycleRaw] = parts;
-                        const name = nameRaw.trim().replace(/^['"]|['"]$/g, '');
                         
-                        const cycleList = parseListString(cycleRaw);
+                        const id = parsed.fields[0] || '';
+                        const userId = parsed.fields[1] || '';
+                        const createdAt = parsed.fields[2] || '';
+                        const name = parsed.fields[3] || '';
+                        
+                        const cycleList = parseListString(parsed.arrayStr);
+                        
+                        if (cycleList.length === 0) {
+                            console.warn(`Empty cycle list for line: ${line}`);
+                            skippedCount++;
+                            continue;
+                        }
                         
                         for (const cycle of cycleList) {
-                            outputRows.push([id.trim(), userId.trim(), createdAt.trim(), name, cycle]);
+                            outputRows.push([id.trim(), userId.trim(), createdAt.trim(), name.trim(), cycle]);
                         }
                         
                         processedCount++;
